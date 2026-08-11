@@ -3,11 +3,14 @@
     <!-- Command Palette Trigger Button -->
     <button
       @click="openModal"
-      class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-medium border border-slate-200 dark:border-slate-700/60 transition-all w-full max-w-xs shadow-sm"
+      class="flex items-center justify-between gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-medium border border-slate-200 dark:border-slate-700/60 transition-all w-full max-w-xs shadow-xs"
     >
-      <Icon name="search" class="w-4 h-4 text-slate-400" />
-      <span class="flex-1 text-left truncate">Search documentation...</span>
-      <kbd class="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded shadow-xs text-slate-400">⌘K</kbd>
+      <div class="flex items-center gap-2 min-w-0">
+        <Icon name="search" class="w-4 h-4 text-slate-400 shrink-0" />
+        <span class="truncate text-left hidden xs:inline">Search docs...</span>
+        <span class="truncate text-left xs:hidden">Search...</span>
+      </div>
+      <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded shadow-xs text-slate-400 shrink-0">⌘K</kbd>
     </button>
 
     <!-- Modal Dialog -->
@@ -15,19 +18,19 @@
       <Transition name="fade">
         <div
           v-if="docStore.isSearchOpen"
-          class="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/60 backdrop-blur-sm"
+          class="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-24 px-3 sm:px-4 bg-slate-950/60 backdrop-blur-sm"
           @click.self="closeModal"
         >
-          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh]">
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]">
             <!-- Search Bar Input Header -->
-            <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
+            <div class="p-3.5 sm:p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2.5 sm:gap-3">
               <Icon name="search" class="w-5 h-5 text-brand-500 shrink-0" />
               <input
                 ref="searchInputRef"
                 v-model="query"
                 type="text"
                 placeholder="Search documents by title, tags, or content..."
-                class="flex-1 bg-transparent border-0 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-0 text-base"
+                class="flex-1 bg-transparent border-0 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-0 text-sm sm:text-base"
                 @input="handleInput"
                 @keydown.down.prevent="navigateResults(1)"
                 @keydown.up.prevent="navigateResults(-1)"
@@ -60,11 +63,10 @@
                       <Icon name="file" class="w-4 h-4 text-brand-500 shrink-0" />
                       <span>{{ res.title }}</span>
                     </h4>
-                    <span v-if="res.category" class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                    <span v-if="res.category" class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 shrink-0">
                       {{ res.category }}
                     </span>
                   </div>
-                  <!-- Snippet with mark tags -->
                   <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2" v-html="res.snippet"></p>
                 </div>
               </div>
