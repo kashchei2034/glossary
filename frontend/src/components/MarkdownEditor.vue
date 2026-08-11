@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-    <!-- Toolbar -->
-    <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300">
+  <div class="flex flex-col h-full w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm min-h-0">
+    <!-- Toolbar (Shrink-0) -->
+    <div class="flex flex-wrap items-center justify-between gap-2 p-2 sm:p-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shrink-0">
       <div class="flex flex-wrap items-center gap-1 text-xs font-medium">
         <!-- Text Styles -->
         <button @click="insertText('# ')" title="Heading 1" class="btn-toolbar"><span class="font-bold text-xs">H1</span></button>
@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <!-- Workspace Body -->
+    <!-- Workspace Body (Flex 1, 100% height) -->
     <div class="flex-1 grid grid-cols-1 min-h-0 overflow-hidden" :class="{ 'sm:grid-cols-2': viewMode === 'split' }">
       <!-- Editor Area -->
       <div v-show="viewMode !== 'preview'" class="flex flex-col h-full min-h-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
@@ -76,17 +76,17 @@
           :value="modelValue"
           @input="onInput"
           placeholder="Write your Markdown content here..."
-          class="flex-1 w-full p-4 font-mono text-sm bg-transparent border-0 resize-none focus:outline-none focus:ring-0 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 leading-relaxed overflow-y-auto"
+          class="flex-1 w-full h-full p-4 font-mono text-sm bg-transparent border-0 resize-none focus:outline-none focus:ring-0 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 leading-relaxed overflow-y-auto min-h-0"
         ></textarea>
         <!-- Footer Stats -->
-        <div class="px-4 py-2 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500 flex justify-between">
+        <div class="px-4 py-2 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500 flex justify-between shrink-0">
           <span>{{ wordCount }} words | {{ charCount }} characters</span>
           <span>Markdown Mode</span>
         </div>
       </div>
 
       <!-- Preview Area -->
-      <div v-show="viewMode !== 'edit'" class="h-full overflow-y-auto p-6 bg-slate-50/50 dark:bg-slate-900/50">
+      <div v-show="viewMode !== 'edit'" class="h-full min-h-0 overflow-y-auto p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-900/50">
         <MarkdownRenderer :content="modelValue" />
       </div>
     </div>

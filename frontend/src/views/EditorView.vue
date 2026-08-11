@@ -1,126 +1,157 @@
 <template>
   <AppLayout>
-    <div class="flex-1 flex flex-col h-full min-h-0 min-w-0 p-4 md:p-6 space-y-4">
+    <div class="flex-1 flex flex-col h-full min-h-0 min-w-0 p-3 sm:p-4 space-y-3">
       <!-- Top Action Bar -->
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div class="flex items-center gap-3">
-          <button @click="router.back()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <button @click="router.back()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
             <Icon name="arrowLeft" class="w-4 h-4" />
           </button>
           <div>
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug">
               {{ isEditMode ? 'Edit Document' : 'Create New Document' }}
             </h2>
-            <p class="text-xs text-slate-400">Markdown Editor Workspace</p>
+            <p class="text-[11px] text-slate-400">Markdown Editor Workspace</p>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
+          <!-- Slide-Over Metadata Settings Button -->
           <button
-            @click="isMetadataDrawerOpen = !isMetadataDrawerOpen"
-            class="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1.5"
+            @click="isMetadataDrawerOpen = true"
+            class="px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-1.5 shadow-xs"
           >
             <Icon name="sliders" class="w-4 h-4 text-brand-500" />
-            <span>Metadata Settings</span>
+            <span class="hidden xs:inline">Document Settings</span>
+            <span class="xs:hidden">Settings</span>
           </button>
 
+          <!-- Save Document CTA -->
           <button
             @click="saveDocument"
             :disabled="saving"
-            class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+            class="px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
           >
             <Icon name="save" class="w-4 h-4" />
-            <span>{{ saving ? 'Saving...' : 'Save Document' }}</span>
+            <span>{{ saving ? 'Saving...' : 'Save' }}</span>
           </button>
         </div>
       </div>
 
-      <!-- Main Layout Grid -->
-      <div class="flex-1 grid grid-cols-1 min-h-0 min-w-0 gap-4" :class="{ 'lg:grid-cols-12': isMetadataDrawerOpen }">
-        <!-- Markdown Editor Main Workspace -->
-        <div class="flex flex-col min-h-0 min-w-0 space-y-3" :class="isMetadataDrawerOpen ? 'lg:col-span-9' : 'col-span-1'">
-          <!-- Document Title Input -->
-          <input
-            v-model="title"
-            type="text"
-            placeholder="Document Title (e.g., How to Configure REST API CORS)"
-            class="w-full px-4 py-3 text-lg font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white placeholder-slate-400"
-          />
+      <!-- Main Full-Width Editor Area (100% width & 100% height) -->
+      <div class="flex-1 flex flex-col min-h-0 min-w-0 space-y-2.5">
+        <!-- Title Input -->
+        <input
+          v-model="title"
+          type="text"
+          placeholder="Document Title (e.g., How to Configure REST API CORS)"
+          class="w-full px-4 py-2.5 text-base sm:text-lg font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white placeholder-slate-400 shrink-0 shadow-xs"
+        />
 
-          <!-- Live Markdown Split Editor -->
-          <div class="flex-1 min-h-0">
-            <MarkdownEditor v-model="contentMd" />
-          </div>
+        <!-- Live Markdown Workspace Container (100% Flex-1 height) -->
+        <div class="flex-1 min-h-0 min-w-0">
+          <MarkdownEditor v-model="contentMd" />
         </div>
+      </div>
 
-        <!-- Metadata Side Drawer -->
-        <div v-if="isMetadataDrawerOpen" class="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-5 overflow-y-auto shadow-xs">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">Document Settings</h3>
+      <!-- Document Settings Slide-Over Drawer Modal -->
+      <Teleport to="body">
+        <Transition name="slide-over">
+          <div
+            v-if="isMetadataDrawerOpen"
+            class="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-xs"
+            @click.self="isMetadataDrawerOpen = false"
+          >
+            <div class="w-full max-w-sm h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 p-5 space-y-5 overflow-y-auto shadow-2xl flex flex-col justify-between">
+              <div class="space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Icon name="sliders" class="w-4 h-4 text-brand-500" />
+                    <span>Document Settings</span>
+                  </h3>
+                  <button
+                    @click="isMetadataDrawerOpen = false"
+                    class="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <Icon name="x" class="w-5 h-5" />
+                  </button>
+                </div>
 
-          <!-- Category Select -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-slate-500">Category</label>
-            <select
-              v-model="selectedCategoryId"
-              class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
-            >
-              <option :value="null">Uncategorized</option>
-              <option v-for="c in categoryStore.categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
-          </div>
+                <!-- Category Select -->
+                <div class="space-y-1.5">
+                  <label class="text-xs font-semibold text-slate-500">Category</label>
+                  <select
+                    v-model="selectedCategoryId"
+                    class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+                  >
+                    <option :value="null">Uncategorized</option>
+                    <option v-for="c in categoryStore.categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+                  </select>
+                </div>
 
-          <!-- Tags Multi Select -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-slate-500">Tags</label>
-            <div class="flex flex-wrap gap-1 border border-slate-200 dark:border-slate-800 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-800/40">
+                <!-- Tags Multi Select -->
+                <div class="space-y-1.5">
+                  <label class="text-xs font-semibold text-slate-500">Tags</label>
+                  <div class="flex flex-wrap gap-1 border border-slate-200 dark:border-slate-800 p-2 rounded-xl bg-slate-50/50 dark:bg-slate-800/40">
+                    <button
+                      v-for="t in categoryStore.tags"
+                      :key="t.id"
+                      @click="toggleTag(t.id)"
+                      type="button"
+                      class="px-2 py-1 rounded-lg text-[11px] font-medium transition-all"
+                      :class="selectedTagIds.includes(t.id) ? 'bg-brand-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
+                    >
+                      #{{ t.name }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- URL Slug -->
+                <div class="space-y-1.5">
+                  <label class="text-xs font-semibold text-slate-500">URL Slug</label>
+                  <input
+                    v-model="slug"
+                    type="text"
+                    placeholder="auto-generated-slug"
+                    class="w-full px-3 py-2 text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <!-- Priority Order -->
+                <div class="space-y-1.5">
+                  <label class="text-xs font-semibold text-slate-500">Sort Priority (Order)</label>
+                  <input
+                    v-model.number="priority"
+                    type="number"
+                    class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <!-- Published Switch -->
+                <div class="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800">
+                  <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Publish Document</span>
+                  <button
+                    @click="isPublished = !isPublished"
+                    type="button"
+                    class="w-11 h-6 rounded-full p-1 transition-colors duration-200 flex items-center"
+                    :class="isPublished ? 'bg-brand-500 justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'"
+                  >
+                    <div class="w-4 h-4 rounded-full bg-white shadow-md"></div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Drawer Footer Apply Button -->
               <button
-                v-for="t in categoryStore.tags"
-                :key="t.id"
-                @click="toggleTag(t.id)"
-                type="button"
-                class="px-2 py-1 rounded-lg text-[11px] font-medium transition-all"
-                :class="selectedTagIds.includes(t.id) ? 'bg-brand-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
+                @click="isMetadataDrawerOpen = false"
+                class="w-full py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold shadow-md transition-all"
               >
-                #{{ t.name }}
+                Apply Settings
               </button>
             </div>
           </div>
-
-          <!-- URL Slug -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-slate-500">URL Slug</label>
-            <input
-              v-model="slug"
-              type="text"
-              placeholder="auto-generated-slug"
-              class="w-full px-3 py-2 text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <!-- Priority Order -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-slate-500">Sort Priority (Order)</label>
-            <input
-              v-model.number="priority"
-              type="number"
-              class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <!-- Published Switch -->
-          <div class="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800">
-            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Publish Document</span>
-            <button
-              @click="isPublished = !isPublished"
-              type="button"
-              class="w-11 h-6 rounded-full p-1 transition-colors duration-200 flex items-center"
-              :class="isPublished ? 'bg-brand-500 justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'"
-            >
-              <div class="w-4 h-4 rounded-full bg-white shadow-md"></div>
-            </button>
-          </div>
-        </div>
-      </div>
+        </Transition>
+      </Teleport>
     </div>
   </AppLayout>
 </template>
@@ -149,7 +180,7 @@ const slug = ref('');
 const priority = ref(0);
 const isPublished = ref(true);
 const saving = ref(false);
-const isMetadataDrawerOpen = ref(true);
+const isMetadataDrawerOpen = ref(false);
 
 function toggleTag(tagId: string) {
   if (selectedTagIds.value.includes(tagId)) {
@@ -212,3 +243,15 @@ onMounted(() => {
   loadExistingDoc();
 });
 </script>
+
+<style scoped>
+.slide-over-enter-active,
+.slide-over-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.slide-over-enter-from,
+.slide-over-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}
+</style>
